@@ -1,5 +1,5 @@
 ﻿local obs = obslua
-
+-- add check if started and not ahk_script_running, run ahk script with commandline arguments
 -- Variables
 local enabled = false
 local ahk_script_path = ""
@@ -100,19 +100,17 @@ local function toggle_recording_if_process_focused()
 
     if is_process then -- If process is the selected process, record
 	
-        if not recording then -- If not recording, then record
-            obs.obs_frontend_recording_start()
-            print("Started recording (Process active)")
+        --if not recording then -- If not recording, then record
+        --    obs.obs_frontend_recording_start()
+        --    print("Started recording (Process active)")
 			
-        elseif paused then -- If paused, then unpause
+        if paused then -- If paused, then unpause
             obs.obs_frontend_recording_pause(false)
-            print("Unpaused recording (Process active)")
 			
         end
 		
     elseif recording and not paused then -- If window is not focused, pause recording
         obs.obs_frontend_recording_pause(true)
-        print("Paused recording (Process not active)")
 		
     end
 end
