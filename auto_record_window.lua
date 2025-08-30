@@ -1,12 +1,11 @@
 ﻿local obs = obslua
--- add check if started and not ahk_script_running, run ahk script with commandline arguments
+
 -- Variables
+
 local enabled = false
-local ahk_script_path = ""
 local selected_process_name = ""
 local check_interval_sec = 1.0
 local timer = 0.0
-local ahk_running = false
 local last_mod_time = 0
 
 
@@ -14,7 +13,6 @@ local last_mod_time = 0
 function script_properties()  -- UI Properties
 
     local props = obs.obs_properties_create()
-    obs.obs_properties_add_text(props, "ahk_script_path", "AHK Script Path", obs.OBS_TEXT_DEFAULT)
     obs.obs_properties_add_text(props, "selected_process_name", "Process Name", obs.OBS_TEXT_DEFAULT)
     obs.obs_properties_add_float(props, "check_interval_sec", "Check Interval (seconds)", 0.1, 1000, 0.1)
 	obs.obs_properties_add_bool(props, "enabled", "Enable Script")
@@ -23,7 +21,6 @@ end
 
 function script_update(settings)  -- Updates variables from ui
     
-    ahk_script_path = obs.obs_data_get_string(settings, "ahk_script_path")
     selected_process_name = obs.obs_data_get_string(settings, "selected_process_name"):lower()
     check_interval_sec = obs.obs_data_get_double(settings, "check_interval_sec")
 	enabled = obs.obs_data_get_bool(settings, "enabled")
@@ -34,7 +31,6 @@ function script_defaults(settings) --- Ui default values
 
     obs.obs_data_set_default_double(settings, "check_interval_sec", 0.5)
     obs.obs_data_set_default_bool(settings, "enabled", false)
-    obs.obs_data_set_default_string(settings, "ahk_script_path", "C:\\Path\\To\\script.ahk")
     obs.obs_data_set_default_string(settings, "selected_process_name", "program.exe")
 end
 
@@ -48,36 +44,16 @@ local function file_exists(path)
     return false
 end
 
--- Function that runs ahk script if it isn't already running
-local function run_ahk_script()
 
-    if not ahk_running and enabled then
-        local command = string.format([[""C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe" "%s"]], ahk_script_path) -- Variable to run .ahk script with autothotkey
-	
-	    -- If file doesn't exist, error and disable script
-        if not file_exists("C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe") or not file_exists(ahk_script_path) then
-	        error("Either the autohotkey file path is incorrect or autohotkey isn't installed")
-	    	enabled = false
-	    	return
-	    end	
-	    
-        os.execute(command) -- Runs ahk script that saves currently focused application to temp file
-		
-		ahk_running = true -- Flag to stop ahk from running again
-	end	
-end
-
--- Gets the exe of the currently focused window by opening external autohotkey script which saves the focused windows exe to a file, then this function reads that temp file and returns it
+-- Reads temp file to get window title
 local function get_active_window_process_name()
-
-    run_ahk_script() -- Runs ahk script if it isn't already running
 	
-	local temp_path = os.getenv("TEMP") or os.getenv("TMP") or "/tmp" -- Gets path of temp folder
-	local file = io.open(temp_path .. "\\auto_record_window_script.txt", "r")  -- Opens temp file holding focused window exe
+	local home_path = os.getenv("HOME") or "/home/user" -- Gets the path of the home directory
+    local file = io.open(home_path .. "/auto_record_window_script.txt", "r") -- Opens temp file holding focused window exe
 	
 	-- If file doesn't exist, error and disable script
 	if not file then
-	    print("Could not read temp file. (happens on first launch)")
+	    print("Could not read temp file.")
 		return
 	end	
 	
@@ -99,10 +75,6 @@ local function toggle_recording_if_process_focused()
     local paused = obs.obs_frontend_recording_paused()
 
     if is_process then -- If process is the selected process, record
-	
-        --if not recording then -- If not recording, then record
-        --    obs.obs_frontend_recording_start()
-        --    print("Started recording (Process active)")
 			
         if paused then -- If paused, then unpause
             obs.obs_frontend_recording_pause(false)
@@ -135,8 +107,8 @@ end
 function script_description()
     return [[
 Automatically starts/pauses recording when specified window is active/inactive.
-Useful for only recording when you're using the specified applicaiton.
+Useful for only recording when you're using the specified application.
 
-Require AutoHotKey V2 and the autohotkey script included in this repo.
+Requires Python.
 ]]
 end
