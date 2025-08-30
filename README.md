@@ -1,6 +1,6 @@
 # OBS Auto Record Window
 
-This script automatically starts/pauses recording when the specified program gains/loses focus. Useful for only recording an application when you're actually using it. Saves space and video length.
+This is a linux python/lua script that automatically starts/pauses recording when the specified program gains/loses focus. Useful for only recording an application when you're actually using it. Saves space and video length.
 
 # Usage
 
@@ -21,4 +21,5 @@ Now OBS will automatically start recording when the specified window gains focus
 (inside file)  
 - `window_check_interval = 0.1` - Checks currently focused window every 0.1ms, and if it's different from last check, write the program window class to file. The python and lua script may not be in sync, so the python script checks frequently to lower the latency. Generally it's a pretty fast operation, but if you are on very slow hardware, you may want to increase the value.
 - `obs_check_interval = 15` - Checks if OBS exists every 15 seconds. Closes script if OBS doesn't exist.
+
 
