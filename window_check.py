@@ -34,19 +34,22 @@ def is_obs_running():
 
 def main():
 
+    # Variables
     home_dir = os.path.expanduser("~")
     temp_name = "auto_record_window_script.txt"
     temp_path = os.path.join(home_dir, temp_name)
 
     last_process = ""
 
+    window_check_interval = 0.1 # 100ms
+    obs_check_interval = 15     # 15 seconds
+
+    last_obs_check = time.time()
+
     # Write initial text to file
     with open(temp_path, 'w') as f:
         f.write("This is a manually created temp file.")
 
-    # Timer to check OBS every 15 seconds
-    obs_check_interval = 15
-    last_obs_check = time.time()
 
     while True:
 
@@ -75,7 +78,7 @@ def main():
 
             last_process = current_process
 
-        time.sleep(0.1)
+        time.sleep(window_check_interval)
 
 
 if __name__ == "__main__":
